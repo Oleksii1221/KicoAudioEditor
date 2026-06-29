@@ -8,6 +8,10 @@
   --panel: rgba(55, 14, 40, 0.74);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -187,10 +191,63 @@ article p {
   line-height: 1.55;
 }
 
+.section-kicker {
+  color: var(--hot);
+  font-weight: 900;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.download-copy {
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
 .download-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
+}
+
+.download-card {
+  display: grid;
+  gap: 8px;
+  min-height: 154px;
+}
+
+.download-card:hover {
+  border-color: rgba(255, 244, 251, 0.88);
+  background: rgba(255, 244, 251, 0.14);
+}
+
+.download-card span {
+  color: var(--hot);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.download-card strong {
+  font-size: 22px;
+}
+
+.download-card small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.download-card.recommended {
+  background: #fff4fb;
+  color: #301426;
+}
+
+.download-card.recommended span,
+.download-card.recommended small {
+  color: #9d1b5f;
 }
 
 @media (max-width: 860px) {
