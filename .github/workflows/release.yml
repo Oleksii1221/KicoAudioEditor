@@ -48,7 +48,8 @@ jobs:
       - name: Install package tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y ruby ruby-dev build-essential rpm libxcb-cursor0
+          sudo apt-get install -y ruby ruby-dev build-essential rpm libxcb-cursor0 || true
+          sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64 || true
           sudo gem install --no-document fpm
           curl -L -o appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool
@@ -58,6 +59,7 @@ jobs:
           version="${{ github.event.inputs.version }}"
           if [ -z "$version" ]; then version="${GITHUB_REF_NAME#v}"; fi
           export KAE_VERSION="$version"
+          export APPIMAGE_EXTRACT_AND_RUN=1
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
           bash packaging/linux/build-appimage.sh
