@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+HERE="$(dirname "$(readlink -f "$0")")"
+export PATH="$HERE/usr/bin:$PATH"
+export PYTHONPATH="$HERE/usr/app/src:${PYTHONPATH:-}"
+exec "$HERE/usr/bin/python" -m kae "$@"

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=KAE
+Comment=Pink anime-themed audio metadata editor
+Exec=kae
+Icon=kae
+Terminal=false
+Type=Application
+Categories=Audio;AudioVideo;Utility;
+StartupWMClass=KAE

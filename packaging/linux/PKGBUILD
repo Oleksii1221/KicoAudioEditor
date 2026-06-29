@@ -1,0 +1,25 @@
+# Maintainer: Kico Audio Lab
+pkgname=kae
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Pink anime-themed native audio metadata editor"
+arch=("x86_64")
+url="https://github.com/Oleksii1221/KicoAudioEditor"
+license=("MIT")
+depends=("python" "python-pyside6" "python-mutagen" "python-pillow")
+source=("KicoAudioEditor-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=("SKIP")
+
+package() {
+  cd "KicoAudioEditor-${pkgver}"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 packaging/linux/kae.desktop "${pkgdir}/usr/share/applications/kae.desktop"
+  install -Dm644 src/kae/assets/images/kae_mascot.png "${pkgdir}/usr/share/icons/hicolor/256x256/apps/kae.png"
+  mkdir -p "${pkgdir}/opt/kae"
+  cp -R src "${pkgdir}/opt/kae/src"
+  install -Dm755 /dev/stdin "${pkgdir}/usr/bin/kae" <<'EOF'
+#!/usr/bin/env bash
+export PYTHONPATH="/opt/kae/src:${PYTHONPATH:-}"
+exec python -m kae "$@"
+EOF
+}
