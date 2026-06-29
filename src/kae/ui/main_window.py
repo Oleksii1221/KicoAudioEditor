@@ -5,6 +5,7 @@ from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QPixmap
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
     QFileDialog,
     QFrame,
@@ -115,6 +116,7 @@ class MainWindow(QMainWindow):
         self.info_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.info_table.verticalHeader().hide()
         self.info_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.info_table.setSelectionMode(QAbstractItemView.NoSelection)
         layout.addWidget(self.info_table)
         return panel
 

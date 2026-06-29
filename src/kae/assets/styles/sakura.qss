@@ -114,3 +114,16 @@ QHeaderView::section {
 QSplitter::handle {
   background: #ff85bd;
 }
+
+QDialog#SettingsDialog {
+  background: #fff5fa;
+}
+
+QDialog#SettingsDialog QLabel,
+QDialog#SettingsDialog QCheckBox {
+  color: #34182a;
+}
+
+QCheckBox {
+  spacing: 8px;
+}
