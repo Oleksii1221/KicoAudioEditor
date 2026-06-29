@@ -9,7 +9,7 @@ KAE is a native desktop audio metadata editor with a polished pink anime visual 
 - Replace, export, remove, and preview embedded cover artwork.
 - Import and export sidecar JSON metadata.
 - Batch-apply album, album artist, genre, and year to selected files.
-- Recent files, autosave preference, language selection, and theme density settings.
+- Recent files, autosave preference, language selection, theme mode, and density settings.
 - Keyboard shortcuts for opening files/folders, saving, artwork actions, settings, and search.
 - MIT licensed.
 

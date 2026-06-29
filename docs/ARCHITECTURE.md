@@ -20,4 +20,4 @@ KAE is intentionally split into a small native desktop shell and testable core s
 - English
 - Japanese
 - Italian
-- Polish
+- Spanish

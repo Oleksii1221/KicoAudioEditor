@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import QByteArray, Qt
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QIcon, QKeySequence, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
@@ -51,6 +51,8 @@ class MainWindow(QMainWindow):
         self.tracks: list[TrackMetadata] = []
         self.current_index = -1
         self.fields: dict[str, QLineEdit | QTextEdit] = {}
+        self.localized_buttons: dict[str, list[QPushButton]] = {}
+        self.localized_labels: dict[str, list[QLabel]] = {}
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
         self.setWindowTitle("KAE")
         self.resize(1240, 790)
@@ -64,6 +66,7 @@ class MainWindow(QMainWindow):
         root_layout.addWidget(self._build_body(), 1)
         self.setCentralWidget(root)
         self._create_actions()
+        self._apply_language()
         self._apply_theme()
         self._load_recent()
 
@@ -81,7 +84,7 @@ class MainWindow(QMainWindow):
             ("save_all", self.save_selected),
             ("settings", self.open_settings),
         ]:
-            button = QPushButton(t(self.settings.language, label))
+            button = self._button(label)
             button.clicked.connect(handler)
             toolbar.addWidget(button)
         self.search = QLineEdit()
@@ -105,10 +108,10 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(panel)
         self.library = QListWidget()
         self.library.currentRowChanged.connect(self._select_track)
-        layout.addWidget(QLabel("Library"))
+        self.library_title = self._label("library")
+        layout.addWidget(self.library_title)
         layout.addWidget(self.library, 1)
         self.info_table = QTableWidget(4, 2)
-        self.info_table.setHorizontalHeaderLabels(["Property", "Value"])
         self.info_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.info_table.verticalHeader().hide()
         self.info_table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -134,7 +137,7 @@ class MainWindow(QMainWindow):
             ("import_json", self.import_json),
             ("export_json", self.export_json),
         ]:
-            button = QPushButton(t(self.settings.language, label))
+            button = self._button(label)
             button.clicked.connect(handler)
             cover_box.addWidget(button)
         cover_box.addStretch()
@@ -155,25 +158,25 @@ class MainWindow(QMainWindow):
             ("bpm", "bpm"),
         ]
         for row, (field, label) in enumerate(rows):
-            form.addWidget(QLabel(t(self.settings.language, label)), row, 0)
+            form.addWidget(self._label(label), row, 0)
             edit = QLineEdit()
             edit.textEdited.connect(self._mark_dirty)
             self.fields[field] = edit
             form.addWidget(edit, row, 1)
-        form.addWidget(QLabel(t(self.settings.language, "comment")), len(rows), 0)
+        form.addWidget(self._label("comment"), len(rows), 0)
         comment = QTextEdit()
         comment.textChanged.connect(self._mark_dirty)
         self.fields["comment"] = comment
         form.addWidget(comment, len(rows), 1)
-        form.addWidget(QLabel(t(self.settings.language, "lyrics")), len(rows) + 1, 0)
+        form.addWidget(self._label("lyrics"), len(rows) + 1, 0)
         lyrics = QTextEdit()
         lyrics.textChanged.connect(self._mark_dirty)
         self.fields["lyrics"] = lyrics
         form.addWidget(lyrics, len(rows) + 1, 1)
 
-        batch = QPushButton(t(self.settings.language, "batch") + ": album/artist/genre/year")
-        batch.clicked.connect(self.batch_apply_common_fields)
-        form.addWidget(batch, len(rows) + 2, 1)
+        self.batch_button = self._button("batch_common")
+        self.batch_button.clicked.connect(self.batch_apply_common_fields)
+        form.addWidget(self.batch_button, len(rows) + 2, 1)
 
         layout.addLayout(cover_box)
         layout.addWidget(form_frame, 1)
@@ -215,12 +218,17 @@ class MainWindow(QMainWindow):
         track = self._current_track()
         if not track:
             return
+        if not self._confirm_save([track]):
+            return
         self._pull_fields(track)
         write_metadata(track)
         self._refresh_item(self.current_index)
 
     def save_selected(self) -> None:
         rows = [index.row() for index in self.library.selectedIndexes()] or [self.current_index]
+        tracks = [self.tracks[row] for row in sorted(set(rows)) if 0 <= row < len(self.tracks)]
+        if not self._confirm_save(tracks):
+            return
         for row in sorted(set(rows)):
             if 0 <= row < len(self.tracks):
                 if row == self.current_index:
@@ -234,8 +242,13 @@ class MainWindow(QMainWindow):
             return
         path, _ = QFileDialog.getOpenFileName(self, "Cover", "", "Images (*.png *.jpg *.jpeg)")
         if path:
-            replace_artwork(track, Path(path))
-            self._render_cover(track)
+            try:
+                replace_artwork(track, Path(path))
+            except Exception:
+                QMessageBox.warning(self, "KAE", t(self.settings.language, "cover_error"))
+                return
+            if not self._render_cover(track):
+                QMessageBox.warning(self, "KAE", t(self.settings.language, "cover_error"))
 
     def export_cover(self) -> None:
         track = self._current_track()
@@ -297,6 +310,7 @@ class MainWindow(QMainWindow):
         dialog = SettingsDialog(self.settings, self)
         if dialog.exec():
             self._apply_theme()
+            self._apply_language()
 
     def _add_paths(self, paths: list[Path]) -> None:
         files = discover_audio_files(paths)
@@ -351,20 +365,35 @@ class MainWindow(QMainWindow):
             setattr(track, field, value)
         track.dirty = True
 
-    def _render_cover(self, track: TrackMetadata) -> None:
+    def _render_cover(self, track: TrackMetadata) -> bool:
         pixmap = QPixmap()
         if track.artwork_bytes:
-            pixmap.loadFromData(QByteArray(track.artwork_bytes))
+            pixmap.loadFromData(track.artwork_bytes)
         else:
             pixmap.load(str(asset_path("images", "kae_mascot.png")))
+        if pixmap.isNull():
+            pixmap.load(str(asset_path("images", "kae_mascot.png")))
+            self.cover.setToolTip(t(self.settings.language, "cover_error"))
+            self.cover.setPixmap(
+                pixmap.scaled(290, 290, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            )
+            return False
+        self.cover.setToolTip("")
         self.cover.setPixmap(pixmap.scaled(290, 290, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        return True
 
     def _render_info(self, track: TrackMetadata) -> None:
         rows = [
-            ("File", track.filename),
-            ("Duration", f"{track.duration_seconds:.1f}s"),
-            ("Bitrate", f"{track.bitrate // 1000} kbps" if track.bitrate else "-"),
-            ("Sample", f"{track.sample_rate} Hz" if track.sample_rate else "-"),
+            (t(self.settings.language, "file"), track.filename),
+            (t(self.settings.language, "duration"), f"{track.duration_seconds:.1f}s"),
+            (
+                t(self.settings.language, "bitrate"),
+                f"{track.bitrate // 1000} kbps" if track.bitrate else "-",
+            ),
+            (
+                t(self.settings.language, "sample"),
+                f"{track.sample_rate} Hz" if track.sample_rate else "-",
+            ),
         ]
         for row, (key, value) in enumerate(rows):
             self.info_table.setItem(row, 0, QTableWidgetItem(key))
@@ -398,4 +427,46 @@ class MainWindow(QMainWindow):
         return None
 
     def _apply_theme(self) -> None:
-        QApplication.instance().setStyleSheet(load_stylesheet(self.settings.compact_mode))
+        QApplication.instance().setStyleSheet(
+            load_stylesheet(self.settings.compact_mode, self.settings.theme)
+        )
+
+    def _apply_language(self) -> None:
+        for key, buttons in self.localized_buttons.items():
+            for button in buttons:
+                button.setText(t(self.settings.language, key))
+        for key, labels in self.localized_labels.items():
+            for label in labels:
+                label.setText(t(self.settings.language, key))
+        self.search.setPlaceholderText(t(self.settings.language, "search"))
+        self.info_table.setHorizontalHeaderLabels(
+            [t(self.settings.language, "property"), t(self.settings.language, "value")]
+        )
+        track = self._current_track()
+        if track:
+            self._render_info(track)
+
+    def _button(self, key: str) -> QPushButton:
+        button = QPushButton(t(self.settings.language, key))
+        self.localized_buttons.setdefault(key, []).append(button)
+        return button
+
+    def _label(self, key: str) -> QLabel:
+        label = QLabel(t(self.settings.language, key))
+        self.localized_labels.setdefault(key, []).append(label)
+        return label
+
+    def _confirm_save(self, tracks: list[TrackMetadata]) -> bool:
+        if not self.settings.confirm_before_overwrite or not tracks:
+            return True
+        names = ", ".join(track.filename for track in tracks[:3])
+        if len(tracks) > 3:
+            names += f" +{len(tracks) - 3}"
+        answer = QMessageBox.question(
+            self,
+            "KAE",
+            f"{t(self.settings.language, 'save')}? {names}",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.Yes,
+        )
+        return answer == QMessageBox.Yes

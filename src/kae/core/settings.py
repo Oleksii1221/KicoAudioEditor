@@ -4,6 +4,8 @@ import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
+from kae.core.i18n import LANGUAGES
+
 APP_DIR = Path.home() / "AppData" / "Roaming" / "KAE"
 SETTINGS_PATH = APP_DIR / "settings.json"
 
@@ -23,7 +25,12 @@ class AppSettings:
         if not SETTINGS_PATH.exists():
             return cls()
         data = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
-        return cls(**{key: data[key] for key in cls.__dataclass_fields__ if key in data})
+        settings = cls(**{key: data[key] for key in cls.__dataclass_fields__ if key in data})
+        if settings.language not in LANGUAGES:
+            settings.language = "uk"
+        if settings.theme not in {"sakura", "night"}:
+            settings.theme = "sakura"
+        return settings
 
     def save(self) -> None:
         APP_DIR.mkdir(parents=True, exist_ok=True)

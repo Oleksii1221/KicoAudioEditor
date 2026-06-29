@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,7 @@ from mutagen.id3 import (
 )
 from mutagen.mp4 import MP4, MP4Cover
 from mutagen.oggvorbis import OggVorbis
+from PIL import Image
 
 from kae.core.models import SUPPORTED_AUDIO_EXTENSIONS, TrackMetadata
 
@@ -121,8 +123,7 @@ def extract_artwork(path: Path) -> tuple[str, bytes] | None:
 
 
 def replace_artwork(track: TrackMetadata, image_path: Path) -> None:
-    track.artwork_bytes = image_path.read_bytes()
-    track.artwork_mime = _mime_from_image_path(image_path)
+    track.artwork_bytes, track.artwork_mime = _normalize_cover_image(image_path)
     track.dirty = True
 
 
@@ -328,3 +329,12 @@ def _set_mp4_pair(audio: MP4, key: str, value: str) -> None:
 
 def _mime_from_image_path(path: Path) -> str:
     return "image/png" if path.suffix.lower() == ".png" else "image/jpeg"
+
+
+def _normalize_cover_image(path: Path) -> tuple[bytes, str]:
+    with Image.open(path) as image:
+        if image.mode not in {"RGB", "RGBA"}:
+            image = image.convert("RGBA")
+        buffer = BytesIO()
+        image.save(buffer, format="PNG")
+        return buffer.getvalue(), "image/png"

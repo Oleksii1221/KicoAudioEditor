@@ -1,6 +1,8 @@
 from pathlib import Path
 
-from kae.core.metadata import discover_audio_files
+from PIL import Image
+
+from kae.core.metadata import discover_audio_files, replace_artwork
 from kae.core.models import TrackMetadata
 
 
@@ -26,3 +28,15 @@ def test_discover_audio_files_filters_supported_extensions(tmp_path: Path) -> No
     flac.write_bytes(b"")
 
     assert discover_audio_files([tmp_path]) == [audio, flac]
+
+
+def test_replace_artwork_normalizes_image_to_png(tmp_path: Path) -> None:
+    cover = tmp_path / "cover.jpg"
+    Image.new("RGB", (8, 8), (255, 100, 180)).save(cover)
+    track = TrackMetadata(path=Path("song.mp3"))
+
+    replace_artwork(track, cover)
+
+    assert track.artwork_mime == "image/png"
+    assert track.artwork_bytes.startswith(b"\x89PNG")
+    assert track.dirty is True

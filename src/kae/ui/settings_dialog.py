@@ -17,8 +17,8 @@ from kae.core.settings import AppSettings
 class SettingsDialog(QDialog):
     def __init__(self, settings: AppSettings, parent=None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("KAE Settings")
         self.settings = settings
+        self.setWindowTitle(t(settings.language, "settings_title"))
         self.language = QComboBox()
         for code, label in LANGUAGES.items():
             self.language.addItem(label, code)
@@ -29,13 +29,13 @@ class SettingsDialog(QDialog):
         self.theme.addItem("Night Sakura", "night")
         self.theme.setCurrentIndex(max(0, self.theme.findData(settings.theme)))
 
-        self.autosave = QCheckBox("Autosave before switching files")
+        self.autosave = QCheckBox(t(settings.language, "autosave"))
         self.autosave.setChecked(settings.autosave_on_file_switch)
-        self.confirm = QCheckBox("Confirm before overwriting files")
+        self.confirm = QCheckBox(t(settings.language, "confirm"))
         self.confirm.setChecked(settings.confirm_before_overwrite)
-        self.recent = QCheckBox("Remember recent files")
+        self.recent = QCheckBox(t(settings.language, "recent"))
         self.recent.setChecked(settings.remember_recent_files)
-        self.compact = QCheckBox("Compact controls")
+        self.compact = QCheckBox(t(settings.language, "compact"))
         self.compact.setChecked(settings.compact_mode)
 
         form = QFormLayout()
@@ -46,9 +46,9 @@ class SettingsDialog(QDialog):
         form.addRow("", self.recent)
         form.addRow("", self.compact)
 
-        cancel = QPushButton("Cancel")
+        cancel = QPushButton(t(settings.language, "cancel"))
         cancel.clicked.connect(self.reject)
-        save = QPushButton("Save")
+        save = QPushButton(t(settings.language, "save"))
         save.clicked.connect(self.accept)
         buttons = QHBoxLayout()
         buttons.addStretch()
