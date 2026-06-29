@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: KAE release downloads
+    url: https://github.com/Oleksii1221/KicoAudioEditor/releases
+    about: Download installers and Linux packages.
+  - name: KAE website
+    url: https://oleksii1221.github.io/KicoAudioEditor/
+    about: Product overview and links.

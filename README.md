@@ -66,6 +66,8 @@ python -m pip install -e ".[dev]"
 python -m kae
 ```
 
+Detailed platform instructions are in [docs/INSTALLATION.md](docs/INSTALLATION.md).
+
 ## Keyboard Shortcuts
 
 | Shortcut | Action |
@@ -89,6 +91,16 @@ KAE is split into testable core services and a native UI shell:
 - `src/kae/assets`: mascot, icon, and QSS theme assets.
 - `packaging`: PyInstaller, Windows installer, and Linux packaging assets.
 - `site`: static product site deployed to GitHub Pages.
+
+Additional project documents:
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Release process](docs/RELEASE.md)
+- [Privacy](docs/PRIVACY.md)
+- [FAQ](docs/FAQ.md)
+- [Acknowledgements](docs/ACKNOWLEDGEMENTS.md)
+- [Support](SUPPORT.md)
 
 Development happens on `dev`. `master` is reserved for release-ready versions after explicit approval.
 

@@ -1,0 +1,34 @@
+name: Feature request
+description: Suggest a new KAE capability.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Workflow problem
+      description: What are you trying to do in your music library?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or UX you want.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Product area
+      options:
+        - Metadata editing
+        - Artwork
+        - Batch workflow
+        - Import / export
+        - Themes / localization
+        - Packaging / installation
+        - Website / documentation
+        - Other
+    validations:
+      required: true

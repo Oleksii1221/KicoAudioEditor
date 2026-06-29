@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a problem in KAE.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve KAE.
+  - type: input
+    id: version
+    attributes:
+      label: KAE version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Windows
+        - Ubuntu / Debian
+        - Fedora / RHEL
+        - Arch Linux
+        - Other Linux
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Click...
+        3. See...
+    validations:
+      required: true
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or sample metadata
+      description: Attach screenshots or non-sensitive sample details. Do not upload copyrighted music unless you own the rights.

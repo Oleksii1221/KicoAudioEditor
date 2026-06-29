@@ -1,0 +1,12 @@
+[
+  { "name": "bug", "color": "d73a4a", "description": "Something is broken." },
+  { "name": "enhancement", "color": "a855f7", "description": "New feature or improvement." },
+  { "name": "needs-triage", "color": "f9d0c4", "description": "Needs initial review." },
+  { "name": "ui", "color": "ff69b4", "description": "Interface, theme, layout, or usability." },
+  { "name": "metadata", "color": "0e8a16", "description": "Audio metadata behavior." },
+  { "name": "artwork", "color": "fbca04", "description": "Cover image workflows." },
+  { "name": "packaging", "color": "1d76db", "description": "Installers, AppImage, deb, rpm, or release automation." },
+  { "name": "documentation", "color": "0075ca", "description": "README, site, or docs." },
+  { "name": "good first issue", "color": "7057ff", "description": "Good starter task." },
+  { "name": "wontfix", "color": "ffffff", "description": "This will not be changed." }
+]
